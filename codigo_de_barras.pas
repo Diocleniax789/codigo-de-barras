@@ -25,12 +25,42 @@ VAR
   valida_codigo_de_empresa:= cod_empre;
   END;
 
+{
+FUNCTION valida_importe(): integer;
+VAR
+ imp: integer;
+ BEGIN
+ write('>>> Ingrese importe <unicamente de 4 digitos>: ');
+ readln(imp);
+ IF (imp < 1000) AND ()
+ END;
+                      }
+
 PROCEDURE genera_codigo_de_barras;
 VAR
  codigo_empresa: integer;
+ opcion: string;
  BEGIN
+ REPEAT
  writeln();
  codigo_empresa:= valida_codigo_de_empresa;
+ {importe:= valida_importe;  }
+
+ REPEAT
+ writeln();
+ write('Desea ingresar otro codigo de empresa[s/n]?: ');
+ readln(opcion);
+ IF (opcion <> 's') AND (opcion <> 'n') THEN
+  BEGIN
+  textcolor(lightred);
+  writeln();
+  writeln('====================================');
+  writeln('VALOR INCORRECTO. INGRESE NUEVAMENTE');
+  writeln('====================================');
+  writeln();
+  END;
+ UNTIL (opcion = 's') OR (opcion = 'n');
+ UNTIL (opcion = 'n');
  END;
 
 PROCEDURE menu_principal;
