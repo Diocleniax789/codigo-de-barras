@@ -1,8 +1,13 @@
 PROGRAM codigos_de_barras;
 USES crt;
 
+CONST
+     ULTIMA_POSICION_X = 4;
+
+TYPE
+    importe = array [1..4]of string;
 VAR
-   codigo_empresa: integer;
+   imp: importe;
 
 FUNCTION valida_codigo_de_empresa(): integer;
 VAR
@@ -25,16 +30,46 @@ VAR
   valida_codigo_de_empresa:= cod_empre;
   END;
 
-{
+
 FUNCTION valida_importe(): integer;
 VAR
- imp: integer;
+ i: integer;
+ digito: string;
  BEGIN
- write('>>> Ingrese importe <unicamente de 4 digitos>: ');
- readln(imp);
- IF (imp < 1000) AND ()
+ writeln('>>> Ingrese importe <unicamente de 4 digitos>: ');
+ writeln('-----------------------------------------------');
+ digito:= readkey;
+ i:= 0;
+ WHILE digito <> #13 DO
+  BEGIN
+  IF digito <> #8 THEN
+   BEGIN
+   gotoxy(whereX,whereY);
+   IF (whereX <= ULTIMA_POSICION_X)  THEN
+    BEGIN
+    write(digito);
+    i:= i + 1;
+    imp[i]:= digito;
+    END;
+   END
+  ELSE
+   BEGIN
+   gotoxy(whereX - 1,whereY);
+   write(' ',#8);
+   imp[i]:=' ';
+   IF (i >= 1) AND (i <= ULTIMA_POSICION_X) THEN
+    i:= i - 1
+    ELSE
+    i:= 0;
+   END;
+  digito:= readkey;
+  END;
+
+
+
+
  END;
-                      }
+
 
 PROCEDURE genera_codigo_de_barras;
 VAR
@@ -44,7 +79,11 @@ VAR
  REPEAT
  writeln();
  codigo_empresa:= valida_codigo_de_empresa;
- {importe:= valida_importe;  }
+ writeln();
+ valida_importe;
+
+   IF SizeOf(imp) < 3 THEN
+   writeln('es chico');
 
  REPEAT
  writeln();
