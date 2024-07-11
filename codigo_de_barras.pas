@@ -9,6 +9,16 @@ TYPE
 VAR
    imp: importe;
 
+PROCEDURE inicializar_arreglo_importe;
+VAR
+ f:integer;
+ BEGIN
+ FOR f:= 1 TO ULTIMA_POSICION_X DO
+  BEGIN
+  imp[f]:=' ';
+  END;
+ END;
+
 FUNCTION valida_codigo_de_empresa(): integer;
 VAR
   cod_empre: integer;
@@ -30,14 +40,15 @@ VAR
   valida_codigo_de_empresa:= cod_empre;
   END;
 
-
-FUNCTION valida_importe(): integer;
+FUNCTION valida_importe(): string;
 VAR
- i: integer;
- digito: string;
+ i,f,tamanio_cadena: integer;
+ digito,importe_a_string,importe_a_string_completo,aux: string;
  BEGIN
+ REPEAT
+ textcolor(white);
+ inicializar_arreglo_importe;
  writeln('>>> Ingrese importe <unicamente de 4 digitos>: ');
- writeln('-----------------------------------------------');
  digito:= readkey;
  i:= 0;
  WHILE digito <> #13 DO
@@ -64,10 +75,37 @@ VAR
    END;
   digito:= readkey;
   END;
-
-
-
-
+  aux:= ' ';
+  FOR f:= 1 TO 4 DO
+   BEGIN
+   IF imp[f] <> ' ' THEN
+    BEGIN
+     IF aux = ' ' THEN
+      BEGIN
+      importe_a_string:= imp[f];
+      aux:= importe_a_string;
+      END
+     ELSE
+      BEGIN
+      importe_a_string:= imp[f];
+      importe_a_string_completo:= concat(aux,importe_a_string);
+      aux:= importe_a_string_completo;
+      END;
+     END;
+   END;
+  writeln();
+  tamanio_cadena:= Length(aux);
+  IF (tamanio_cadena <= 3) THEN
+   BEGIN
+   textcolor(lightred);
+   writeln();
+   writeln('========================================================');
+   writeln('X SE DEBEN INGRESAR CUATRO DIGITOS. INTENTE NUEVAMENTE X');
+   writeln('========================================================');
+   writeln();
+   END;
+  UNTIL (tamanio_cadena = 4);
+  valida_importe:= aux;
  END;
 
 
@@ -80,10 +118,8 @@ VAR
  writeln();
  codigo_empresa:= valida_codigo_de_empresa;
  writeln();
- valida_importe;
-
-   IF SizeOf(imp) < 3 THEN
-   writeln('es chico');
+ valida_importe();
+ writeln('validado');
 
  REPEAT
  writeln();
