@@ -1,13 +1,19 @@
 PROGRAM codigos_de_barras;
-USES crt;
+USES crt, SysUtils;
 
 CONST
      ULTIMA_POSICION_X = 4;
 
 TYPE
-    importe = array [1..4]of string;
+    importe = array[1..4]of string;
+    empresa = array[1..3]of integer;
+    empresa_importe = array[1..7]of integer;
+    empresa_importe_codigo_verificador = array[1..8]of integer;
 VAR
    imp: importe;
+   emp: empresa;
+   emp_imp: empresa_importe;
+   emp_imp_cod_verif: empresa_importe_codigo_verificador;
 
 PROCEDURE inicializar_arreglo_importe;
 VAR
@@ -15,30 +21,102 @@ VAR
  BEGIN
  FOR f:= 1 TO ULTIMA_POSICION_X DO
   BEGIN
-  imp[f]:=' ';
+  imp[f]:= ' ';
   END;
  END;
 
-FUNCTION valida_codigo_de_empresa(): string;
+PROCEDURE inicializar_arreglo_empresa;
 VAR
-  f: integer;
-  cod_empre,aux,codigo_empresa: string;
+ f: integer;
+ BEGIN
+ FOR f:= 1 TO 3 DO
   BEGIN
-  aux:=' ';
+  emp[f]:= 0;
+  END;
+ END;
+
+PROCEDURE inicializar_arreglo_empresa_importe;
+VAR
+ f: integer;
+ BEGIN
+ FOR f:= 1 TO 3 DO
+  BEGIN
+  emp_imp[f]:= 0;
+  END;
+ END;
+
+PROCEDURE incializar_arreglo_empresa_importa_cod_verificacion;
+VAR
+ f: integer;
+ BEGIN
+ FOR f:= 1 TO 8 DO
+  BEGIN
+  emp_imp_cod_verif[f]:= 0;
+  END;
+ END;
+
+PROCEDURE valida_codigo_de_empresa;
+VAR
+  f,cod_empre: integer;
+  BEGIN
+  inicializar_arreglo_empresa;
   FOR f:= 1 TO 3 DO
    BEGIN
-   textcolor(white);
-   write('>>> INGRESE EL DIGITO ',f,': ');
-   readln(cod_empre);
-   IF aux = ' ' THEN
-    aux:= cod_empre
-   ELSE
+    IF f = 1 THEN
     BEGIN
-    codigo_empresa:= concat(aux,cod_empre);
-    aux:= codigo_empresa;
-    END;
+      REPEAT
+      textcolor(white);
+      write('>>> INGRESE UN PRIMER DIGITO <DE ENTRE 0 Y 9>: ');
+      readln(cod_empre);
+      IF (cod_empre < 0) OR (cod_empre > 9) THEN
+       BEGIN
+       textcolor(lightred);
+       writeln();
+       writeln('=======================================');
+       writeln('X FUERA DEL RANGO. INGRESE NUEVAMENTE X');
+       writeln('=======================================');
+       writeln();
+       END;
+      UNTIL (cod_empre >= 0) AND (cod_empre <= 9);
+      emp[f]:= cod_empre;
+    END
+  ELSE IF f = 2 THEN
+   BEGIN
+    REPEAT
+    textcolor(white);
+    write('>>> INGRESE UN SEGUNDO DIGITO <DE ENTRE 0 Y 9>: ');
+    readln(cod_empre);
+    IF (cod_empre < 0) OR (cod_empre > 9) THEN
+     BEGIN
+     textcolor(lightred);
+     writeln();
+     writeln('=======================================');
+     writeln('X FUERA DEL RANGO. INGRESE NUEVAMENTE X');
+     writeln('=======================================');
+     writeln();
+     END;
+    UNTIL (cod_empre >= 0) AND (cod_empre <= 9);
+    emp[f]:= cod_empre;
+   END
+  ELSE
+   BEGIN
+    REPEAT
+    textcolor(white);
+    write('>>> INGRESE UN PRIMER DIGITO <DE ENTRE 0 Y 9>: ');
+    readln(cod_empre);
+    IF (cod_empre < 0) OR (cod_empre > 9) THEN
+     BEGIN
+     textcolor(lightred);
+     writeln();
+     writeln('=======================================');
+     writeln('X FUERA DEL RANGO. INGRESE NUEVAMENTE X');
+     writeln('=======================================');
+     writeln();
+     END;
+    UNTIL (cod_empre >= 0) AND (cod_empre <= 9);
+    emp[f]:= cod_empre;
    END;
-   valida_codigo_de_empresa:= aux;
+  END;
   END;
 
 FUNCTION valida_importe(): string;
@@ -109,28 +187,135 @@ VAR
   valida_importe:= aux;
  END;
 
+FUNCTION convertir_arreglo_empresa_integer_a_string(): string;
+VAR
+ aux,integer_to_string,unir_string: string;
+ f:integer;
+ BEGIN
+ inicializar_arreglo_empresa_importe;
+ aux:= ' ';
+ FOR f:= 1 TO 3 DO
+  BEGIN
+   IF aux = ' ' THEN
+    BEGIN
+    integer_to_string:= IntToStr(emp[f]);
+    aux:= integer_to_string;
+    END
+   ELSE
+    BEGIN
+    integer_to_string:= IntToStr(emp[f]);
+    unir_string:= concat(aux,integer_to_string);
+    aux:= unir_string;
+    END;
+  END;
+  convertir_arreglo_empresa_integer_a_string:= aux;
+ END;
+
+PROCEDURE codigo_completo_string_a_integer(codigo_completo_string: string);
+VAR
+ f: integer;
+ BEGIN
+ FOR f:= 1 TO Length(codigo_completo_string) DO
+  BEGIN
+  emp_imp[f]:= StrToInt(codigo_completo_string[f]);
+  END;
+ END;
+
+FUNCTION generar_digito_verificador(): integer;
+VAR
+ f,acumulador_impares,acumulador_pares,digito_verificador,absoluto: integer;
+ BEGIN
+ acumulador_impares:= 0;
+ acumulador_pares:= 0;
+ FOR f:= 1 TO 7 DO
+  BEGIN
+  IF  (f MOD 2) = 0 THEN
+   acumulador_pares:= acumulador_pares + emp_imp[f]
+  ELSE
+   acumulador_impares:= acumulador_impares + emp_imp[f];
+  END;
+  absoluto:= abs(acumulador_impares + acumulador_pares);
+  digito_verificador:=  absoluto  MOD 10;
+  generar_digito_verificador:= digito_verificador;
+ END;
+
+PROCEDURE crea_codigo_completo(codigo_verificador: integer);
+VAR
+ k,f,h,n1,n2,n3,n4,n5,n6,n7,n8:integer;
+ BEGIN
+ FOR f:= 1 TO 7 DO
+  BEGIN
+  IF f = 1 THEN
+   n1:= emp_imp[f]
+  ELSE IF f = 2 THEN
+   n2:= emp_imp[f]
+  ELSE IF f = 3 THEN
+   n3:= emp_imp[f]
+  ELSE IF f = 4 THEN
+   n4:= emp_imp[f]
+  ELSE IF f = 5 THEN
+   n5:= emp_imp[f]
+  ELSE IF f = 6 THEN
+   n6:= emp_imp[f]
+  ELSE
+   n7:= emp_imp[f];
+  END;
+  n8:= codigo_verificador;
+ FOR h:= 1 TO 8 DO
+  BEGIN
+  IF h = 1 THEN
+   emp_imp_cod_verif[h]:= n1
+  ELSE IF h = 2 THEN
+   emp_imp_cod_verif[h]:= n2
+  ELSE IF h = 3 THEN
+   emp_imp_cod_verif[h]:= n3
+  ELSE IF h = 4 THEN
+   emp_imp_cod_verif[h]:= n4
+  ELSE IF h = 5 THEN
+   emp_imp_cod_verif[h]:= n5
+  ELSE IF h = 6 THEN
+   emp_imp_cod_verif[h]:= n6
+  ELSE IF h = 7 THEN
+   emp_imp_cod_verif[h]:= n7
+  ELSE
+   emp_imp_cod_verif[h]:= n8;
+  END;
+
+ writeln('TU CODIGO NUMERICO: ');
+ writeln('--------------------');
+ FOR k:= 1 TO 8 DO
+  BEGIN
+   write(emp_imp_cod_verif[k]);
+  END;
+
+ END;
 
 PROCEDURE genera_codigo_de_barras;
 VAR
- opcion,op,codigo_semi_completo,codigo_empresa,importe: string;
+ codigo_verificador: integer;
+ opcion,op,codigo_completo_string,importe,codigo_empresa: string;
  BEGIN
  REPEAT
  clrscr;
+ incializar_arreglo_empresa_importa_cod_verificacion;
  writeln();
- codigo_empresa:= valida_codigo_de_empresa;
+ valida_codigo_de_empresa;
  writeln();
-
-
+ codigo_empresa:= convertir_arreglo_empresa_integer_a_string;
  REPEAT
  textcolor(white);
  writeln();
  importe:= valida_importe;
  writeln();
- codigo_semi_completo:= concat(codigo_empresa,importe);
- writeln();
- writeln(codigo_semi_completo);
- writeln();
+ codigo_completo_string:= concat(codigo_empresa,importe);
+ codigo_completo_string_a_integer(codigo_completo_string);
+ codigo_verificador:= generar_digito_verificador;
+ crea_codigo_completo(codigo_verificador);
+
+
+
  REPEAT
+ writeln();
  writeln('Desea agregar otro codigo[s/n]?: ');
  readln(op);
  IF (op <> 's') AND (op <> 'n') THEN
