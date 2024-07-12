@@ -9,11 +9,17 @@ TYPE
     empresa = array[1..3]of integer;
     empresa_importe = array[1..7]of integer;
     empresa_importe_codigo_verificador = array[1..8]of integer;
+    arreglo_codigo_de_barras = array[1..8]of string;
+    cadena_binaria = array[1..4]of integer;
+    cadena_binaria_string = array[1..8]of string;
 VAR
    imp: importe;
    emp: empresa;
    emp_imp: empresa_importe;
    emp_imp_cod_verif: empresa_importe_codigo_verificador;
+   ar_cod_bar: arreglo_codigo_de_barras;
+   cad_bin: cadena_binaria;
+   cad_bin_string: cadena_binaria_string;
 
 PROCEDURE inicializar_arreglo_importe;
 VAR
@@ -42,6 +48,16 @@ VAR
  FOR f:= 1 TO 3 DO
   BEGIN
   emp_imp[f]:= 0;
+  END;
+ END;
+
+PROCEDURE inicializar_arreglo_codigo_de_barras;
+VAR
+ f: integer;
+ BEGIN
+ FOR f:= 1 TO 8 DO
+  BEGIN
+   ar_cod_bar[f]:= ' ';
   END;
  END;
 
@@ -287,7 +303,48 @@ VAR
   BEGIN
    write(emp_imp_cod_verif[k]);
   END;
+ writeln();
+ END;
 
+PROCEDURE convertir_digito_a_binario(digito: integer);
+VAR
+ f,exp,base,potencia,resta: integer;
+ BEGIN
+ exp:= 4;
+ base:= 2;
+ FOR f:= 1 TO 4 DO
+  BEGIN
+  exp:= exp - 1;
+  potencia:= power(base,exp);
+  IF potencia <= digito THEN
+   BEGIN
+   cad_bin[f]:= 1;
+   resta:= digito - potencia;
+   IF resta >= 0 THEN
+   digito:= resta;
+   END
+  ELSE
+   cad_bin[f]:= 0;
+  END;
+ writeln();
+ writeln();
+
+ for f:= 1 to 4 do
+  begin
+  write(cad_bin[f]);
+  end;
+
+ END;
+
+PROCEDURE crear_codigo_de_barras;
+VAR
+ f,digito: integer;
+ BEGIN
+ FOR f:= 1 TO 8 DO
+  BEGIN
+   digito:= emp_imp_cod_verif[f];
+   convertir_digito_a_binario(digito);
+  END;
  END;
 
 PROCEDURE genera_codigo_de_barras;
@@ -311,9 +368,7 @@ VAR
  codigo_completo_string_a_integer(codigo_completo_string);
  codigo_verificador:= generar_digito_verificador;
  crea_codigo_completo(codigo_verificador);
-
-
-
+ crear_codigo_de_barras;
  REPEAT
  writeln();
  writeln('Desea agregar otro codigo[s/n]?: ');
