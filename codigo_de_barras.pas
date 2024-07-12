@@ -19,25 +19,26 @@ VAR
   END;
  END;
 
-FUNCTION valida_codigo_de_empresa(): integer;
+FUNCTION valida_codigo_de_empresa(): string;
 VAR
-  cod_empre: integer;
+  f: integer;
+  cod_empre,aux,codigo_empresa: string;
   BEGIN
-  REPEAT
-  textcolor(white);
-  write('>>> Ingrese codigo de empresa <unicamente de tres digitos>: ');
-  readln(cod_empre);
-  IF (cod_empre < 100) OR (cod_empre > 999) THEN
+  aux:=' ';
+  FOR f:= 1 TO 3 DO
    BEGIN
-   textcolor(lightred);
-   writeln();
-   writeln('==========================================================');
-   writeln('X POR FAVOR. INGRESE UN NUMERO DE TRES CIFRAS NUEVAMENTE X');
-   writeln('==========================================================');
-   writeln();
+   textcolor(white);
+   write('>>> INGRESE EL DIGITO ',f,': ');
+   readln(cod_empre);
+   IF aux = ' ' THEN
+    aux:= cod_empre
+   ELSE
+    BEGIN
+    codigo_empresa:= concat(aux,cod_empre);
+    aux:= codigo_empresa;
+    END;
    END;
-  UNTIL (cod_empre >= 100) AND (cod_empre <= 999);
-  valida_codigo_de_empresa:= cod_empre;
+   valida_codigo_de_empresa:= aux;
   END;
 
 FUNCTION valida_importe(): string;
@@ -111,15 +112,39 @@ VAR
 
 PROCEDURE genera_codigo_de_barras;
 VAR
- codigo_empresa: integer;
- opcion: string;
+ opcion,op,codigo_semi_completo,codigo_empresa,importe: string;
  BEGIN
  REPEAT
+ clrscr;
  writeln();
  codigo_empresa:= valida_codigo_de_empresa;
  writeln();
- valida_importe();
- writeln('validado');
+
+
+ REPEAT
+ textcolor(white);
+ writeln();
+ importe:= valida_importe;
+ writeln();
+ codigo_semi_completo:= concat(codigo_empresa,importe);
+ writeln();
+ writeln(codigo_semi_completo);
+ writeln();
+ REPEAT
+ writeln('Desea agregar otro codigo[s/n]?: ');
+ readln(op);
+ IF (op <> 's') AND (op <> 'n') THEN
+  BEGIN
+  textcolor(lightred);
+  writeln();
+  writeln('========================================');
+  writeln('X VALOR INCORRECTO. INGRESE NUEVAMENTE X');
+  writeln('========================================');
+  writeln();
+  END;
+ UNTIL (op = 's') OR (op = 'n');
+ UNTIL (op = 'n');
+
 
  REPEAT
  writeln();
