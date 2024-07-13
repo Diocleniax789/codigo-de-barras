@@ -9,7 +9,6 @@ TYPE
     empresa = array[1..3]of integer;
     empresa_importe = array[1..7]of integer;
     empresa_importe_codigo_verificador = array[1..8]of integer;
-    arreglo_codigo_de_barras = array[1..8]of string;
     cadena_binaria = array[1..4]of integer;
     cadena_binaria_string = array[1..8]of string;
 VAR
@@ -17,7 +16,6 @@ VAR
    emp: empresa;
    emp_imp: empresa_importe;
    emp_imp_cod_verif: empresa_importe_codigo_verificador;
-   ar_cod_bar: arreglo_codigo_de_barras;
    cad_bin: cadena_binaria;
    cad_bin_string: cadena_binaria_string;
 
@@ -48,16 +46,6 @@ VAR
  FOR f:= 1 TO 3 DO
   BEGIN
   emp_imp[f]:= 0;
-  END;
- END;
-
-PROCEDURE inicializar_arreglo_codigo_de_barras;
-VAR
- f: integer;
- BEGIN
- FOR f:= 1 TO 8 DO
-  BEGIN
-   ar_cod_bar[f]:= ' ';
   END;
  END;
 
@@ -306,9 +294,10 @@ VAR
  writeln();
  END;
 
-PROCEDURE convertir_digito_a_binario(digito: integer);
+FUNCTION convertir_digito_a_binario(digito: integer): string;
 VAR
- f,exp,base,potencia,resta: integer;
+ aux,cadena,cadena_completa: string;
+ h,f,exp,base,potencia,resta,digito_aux: integer;
  BEGIN
  exp:= 4;
  base:= 2;
@@ -326,25 +315,87 @@ VAR
   ELSE
    cad_bin[f]:= 0;
   END;
- writeln();
- writeln();
 
- for f:= 1 to 4 do
-  begin
-  write(cad_bin[f]);
-  end;
-
+ aux:= ' ';
+ FOR h:= 1 TO 4 DO
+  BEGIN
+  IF aux = ' ' THEN
+   BEGIN
+   digito_aux:= cad_bin[h];
+   cadena:= IntToStr(digito_aux);
+   aux:= cadena;
+   END
+  ELSE
+   BEGIN
+   digito_aux:= cad_bin[h];
+   cadena:= IntToStr(digito_aux);
+   cadena_completa:= concat(aux,cadena);
+   aux:= cadena_completa;
+   END;
+  END;
+  convertir_digito_a_binario:= aux;
  END;
+
+FUNCTION verifica_1_0(digito_cadena: string): string;
+VAR
+ cadena,aux,cadena_parte: string;
+ k: integer;
+ BEGIN
+   aux:= ' ';
+   FOR k:= 1 TO Length(digito_cadena) DO
+    BEGIN
+
+    IF  aux = ' ' THEN
+     BEGIN
+      IF digito_cadena[k] = '1' THEN
+       BEGIN
+       cadena:= '|';
+       aux:= cadena;
+       END
+      ELSE
+       BEGIN
+       cadena:= '  ';
+       aux:= cadena;
+       END;
+     END
+    ELSE
+     IF digito_cadena[k] = '1' THEN
+       BEGIN
+       cadena:= '|';
+       cadena_parte:= concat(aux,cadena);
+       aux:= cadena_parte;
+       END
+      ELSE
+       BEGIN
+       cadena:= '  ';
+       cadena_parte:= concat(aux,cadena);
+       aux:= cadena_parte;
+       END;
+   END;
+   verifica_1_0:= aux;
+  END;
+
 
 PROCEDURE crear_codigo_de_barras;
 VAR
- f,digito: integer;
+ digitos_binarios,digito_cadena,codigo_barra: string;
+ h,f,digito: integer;
  BEGIN
  FOR f:= 1 TO 8 DO
   BEGIN
    digito:= emp_imp_cod_verif[f];
-   convertir_digito_a_binario(digito);
+   digitos_binarios:= convertir_digito_a_binario(digito);
+   cad_bin_string[f]:= digitos_binarios;
   END;
+
+ FOR h:= 1 TO 8 DO
+  BEGIN
+  digito_cadena:= cad_bin_string[h];
+  codigo_barra:= verifica_1_0(digito_cadena);
+  textcolor(green);
+  write(codigo_barra);
+  END;
+
  END;
 
 PROCEDURE genera_codigo_de_barras;
@@ -368,8 +419,11 @@ VAR
  codigo_completo_string_a_integer(codigo_completo_string);
  codigo_verificador:= generar_digito_verificador;
  crea_codigo_completo(codigo_verificador);
+ writeln();
  crear_codigo_de_barras;
+ writeln();
  REPEAT
+ textcolor(white);
  writeln();
  writeln('Desea agregar otro codigo[s/n]?: ');
  readln(op);
